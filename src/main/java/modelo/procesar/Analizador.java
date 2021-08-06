@@ -6,6 +6,12 @@ import modelo.tokens.TiposDeTokens;
 
 import java.util.ArrayList;
 
+
+/**
+ * Analizador recibe una cadena y la va a descomponer en un arreglo de chars, para su buscar tokens y sus respectivos
+ * tipos, tambien busca errores.
+ * @author abnerhl
+ */
 @Getter
 @Setter
 public class Analizador {
@@ -22,14 +28,17 @@ public class Analizador {
     public void analizar() {
         char[] charsTmp = cadenaRecibida.toCharArray();
         char[] chars = new char[charsTmp.length + 1];
+        //Agrego un espacio al finalizar para asegurar que el ultimo token sea analizado y agregado a las listas
         System.arraycopy(charsTmp, 0, chars, 0, charsTmp.length);
         chars[charsTmp.length] = ' ';
 
+        //para cada char c del arreglo chars analizaré que tipo de char es, y a que tipo de seccuencia de token
+        //corresponde segun el mismo y el estado que se guarda del anterior.
         for (char c : chars) {
             if (Estados.EMPEZAR == estadoGuardado) {
-                estadoEmpezar(c);
+                estadoEmpezarYEspacio(c);
             } else if (Estados.ESPACIO == estadoGuardado) {
-                estadoEspacio(c);
+                estadoEmpezarYEspacio(c);
             } else if (Estados.CARACTER == estadoGuardado) {
                 estadoCaracter(c);
             } else if (Estados.PUNTO == estadoGuardado) {
@@ -130,28 +139,7 @@ public class Analizador {
         }
     }
 
-    private void estadoEspacio(char c) {
-        if (Character.isLetter(c)) {
-            tmp += String.valueOf(c);
-            estadoGuardado = Estados.CARACTER;
-        } else if (Character.isDigit(c)) {
-            tmp += String.valueOf(c);
-            estadoGuardado = Estados.DIGITO;
-        } else if (Character.isSpaceChar(c)) {
-            estadoGuardado = Estados.ESPACIO;
-        } else if (isPunto(c)) {
-            tmp += String.valueOf(c);
-            estadoGuardado = Estados.PUNTO;
-        } else if (isSimbolo(c)) {
-            tmp += String.valueOf(c);
-            tockens.add(tmp);
-            tmp = "";
-            tipoTockens.add(TiposDeTokens.SIMBOLO);
-            estadoGuardado = Estados.SIMBOLO;
-        }
-    }
-
-    private void estadoEmpezar(char c) {
+    private void estadoEmpezarYEspacio(char c) {
         if (Character.isLetter(c)) {
             tmp += String.valueOf(c);
             estadoGuardado = Estados.CARACTER;
