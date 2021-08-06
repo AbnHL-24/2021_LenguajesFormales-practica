@@ -20,26 +20,94 @@ public class Analizador {
     }
 
     public void analizar() {
-        char[] chars = cadenaRecibida.toCharArray();
+        char[] charsTmp = cadenaRecibida.toCharArray();
+        char[] chars = new char[charsTmp.length + 1];
+        System.arraycopy(charsTmp, 0, chars, 0, charsTmp.length);
+        chars[charsTmp.length] = ' ';
 
-        for (int i = 0; i < chars.length; i++) {
-            if (i < chars.length - 1) {
-                if (Estados.EMPEZAR == estadoGuardado) {
-                    estadoEmpezar(chars[i]);
-                } else if (Estados.CARACTER == estadoGuardado) {
-                    estadoCaracter(chars[i]);
-                } else if (Estados.PUNTO == estadoGuardado) {
-                    estadoPunto(chars[i]);
-                }
-            } else {
-                //Aca se agregara la logica para la ultima posicon del arreglo de char
+        for (char c : chars) {
+            if (Estados.EMPEZAR == estadoGuardado) {
+                estadoEmpezarOEspacio(c);
+            } else if (Estados.ESPACIO == estadoGuardado) {
+                estadoEmpezarOEspacio(c);
+            } else if (Estados.CARACTER == estadoGuardado) {
+                estadoCaracter(c);
+            } else if (Estados.PUNTO == estadoGuardado) {
+                estadoPunto(c);
+            } else if (Estados.DIGITO == estadoGuardado) {
+                estadoDigito(c);
+            } else if (Estados.SIMBOLO == estadoGuardado) {
+                estadoSimbolo(c);
+            } else if (Estados.ERROR ==  estadoGuardado) {
+                estadoError(c);
             }
         }
     }
 
-    private void estadoPunto(char c) {
-        if (isPunto(c)) {
+    private void estadoError(char c) {
+        if (Character.isSpaceChar(c)) {
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.ERROR);
+            estadoGuardado = Estados.ESPACIO;
+        } else {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.ERROR;
+        }
+    }
 
+    private void estadoSimbolo(char c) {
+        if (isSimbolo(c)){
+            tmp += String.valueOf(c);
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.SIMBOLO);
+            estadoGuardado = Estados.SIMBOLO;
+        } else if (Character.isSpaceChar(c)) {
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.SIMBOLO);
+            estadoGuardado = Estados.ESPACIO;
+        } else {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.ERROR;
+        }
+    }
+
+    private void estadoDigito(char c) {
+        if (Character.isDigit(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.DIGITO;
+        } else if (isPunto(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.PUNTO;
+        } else if (Character.isSpaceChar(c)) {
+            tockens.add(tmp);
+            if (tmp.contains(".")) {
+                tipoTockens.add(TiposDeTokens.DECIMAL);
+            } else {
+                tipoTockens.add(TiposDeTokens.ENTERO);
+            }
+            tmp = "";
+            estadoGuardado = Estados.ESPACIO;
+        } else {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.ERROR;
+        }
+    }
+
+    private void estadoPunto(char c) {
+        if (Character.isSpaceChar(c)) {
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.ERROR);
+            estadoGuardado = Estados.ESPACIO;
+        } else if (Character.isDigit(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.DIGITO;
+        } else {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.ERROR;
         }
     }
 
@@ -62,7 +130,7 @@ public class Analizador {
         }
     }
 
-    private void estadoEmpezar(char c) {
+    private void estadoEmpezarOEspacio(char c) {
         if (Character.isLetter(c)) {
             tmp += String.valueOf(c);
             estadoGuardado = Estados.CARACTER;

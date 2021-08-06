@@ -33,6 +33,11 @@ public class InterfazCTRL implements ActionListener {
             List<String> lineas = separadorLineasCTRL.separarLineas();
             for (String s : lineas) {
                 Analizador analizador = new Analizador(s);
+                analizador.analizar();
+                for (int i = 0; i < analizador.getTockens().size(); i++) {
+                    System.out.println(analizador.getTockens().get(i) +
+                            ", " + analizador.getTipoTockens().get(i).name());
+                }
             }
         }
     }
