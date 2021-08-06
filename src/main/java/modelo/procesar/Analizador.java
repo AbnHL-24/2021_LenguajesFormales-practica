@@ -2,10 +2,10 @@ package modelo.procesar;
 
 import lombok.*;
 import modelo.estados.Estados;
+import modelo.tokens.TiposDeTokens;
 
 import java.util.ArrayList;
 
-@Builder
 @Getter
 @Setter
 public class Analizador {
@@ -13,27 +13,59 @@ public class Analizador {
     Estados estadoGuardado = Estados.EMPEZAR;
     String tmp = "";
     ArrayList<String> tockens = new ArrayList<>();
+    ArrayList<TiposDeTokens> tipoTockens = new ArrayList<>();
+
+    public Analizador(String cadenaRecibida) {
+        this.cadenaRecibida = cadenaRecibida;
+    }
 
     public void analizar() {
         char[] chars = cadenaRecibida.toCharArray();
 
-        for (char c : chars) {
-            if (Estados.EMPEZAR == estadoGuardado) {
-                estadoEmpezar(c);
-            } else if (Estados.LETRA == estadoGuardado) {
-                estadoLetra(c);
+        for (int i = 0; i < chars.length; i++) {
+            if (i < chars.length - 1) {
+                if (Estados.EMPEZAR == estadoGuardado) {
+                    estadoEmpezar(chars[i]);
+                } else if (Estados.CARACTER == estadoGuardado) {
+                    estadoCaracter(chars[i]);
+                } else if (Estados.PUNTO == estadoGuardado) {
+                    estadoPunto(chars[i]);
+                }
+            } else {
+                //Aca se agregara la logica para la ultima posicon del arreglo de char
             }
         }
     }
 
-    private void estadoLetra(char c) {
-        
+    private void estadoPunto(char c) {
+        if (isPunto(c)) {
+
+        }
+    }
+
+    private void estadoCaracter(char c) {
+        if (Character.isSpaceChar(c)) {
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.IDENTIFICADOR);
+            estadoGuardado = Estados.ESPACIO;
+        } else if (Character.isLetter(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.CARACTER;
+        } else if (Character.isDigit(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.CARACTER;
+            //Los identificadores pueden contener digitos, y estos digitos no son numeros sino caracteres.
+        } else {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.ERROR;
+        }
     }
 
     private void estadoEmpezar(char c) {
         if (Character.isLetter(c)) {
             tmp += String.valueOf(c);
-            estadoGuardado = Estados.LETRA;
+            estadoGuardado = Estados.CARACTER;
         } else if (Character.isDigit(c)) {
             tmp += String.valueOf(c);
             estadoGuardado = Estados.DIGITO;
@@ -42,13 +74,12 @@ public class Analizador {
         } else if (isPunto(c)) {
             tmp += String.valueOf(c);
             estadoGuardado = Estados.PUNTO;
-            tockens.add(tmp);
-            tmp = "";
         } else if (isSimbolo(c)) {
             tmp += String.valueOf(c);
-            estadoGuardado = Estados.SIMBOLO;
             tockens.add(tmp);
             tmp = "";
+            tipoTockens.add(TiposDeTokens.SIMBOLO);
+            estadoGuardado = Estados.SIMBOLO;
         }
     }
 

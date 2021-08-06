@@ -32,8 +32,7 @@ public class InterfazCTRL implements ActionListener {
             SeparadorLineasCTRL separadorLineasCTRL = new SeparadorLineasCTRL(interfazGui.getTxaTexto());
             List<String> lineas = separadorLineasCTRL.separarLineas();
             for (String s : lineas) {
-                Analizador analizador = Analizador.builder()
-                        .cadenaRecibida(s).build();
+                Analizador analizador = new Analizador(s);
             }
         }
     }
