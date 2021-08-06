@@ -27,9 +27,9 @@ public class Analizador {
 
         for (char c : chars) {
             if (Estados.EMPEZAR == estadoGuardado) {
-                estadoEmpezarOEspacio(c);
+                estadoEmpezar(c);
             } else if (Estados.ESPACIO == estadoGuardado) {
-                estadoEmpezarOEspacio(c);
+                estadoEspacio(c);
             } else if (Estados.CARACTER == estadoGuardado) {
                 estadoCaracter(c);
             } else if (Estados.PUNTO == estadoGuardado) {
@@ -64,9 +64,9 @@ public class Analizador {
             tipoTockens.add(TiposDeTokens.SIMBOLO);
             estadoGuardado = Estados.SIMBOLO;
         } else if (Character.isSpaceChar(c)) {
-            tockens.add(tmp);
+            //acá no se agrega el tmp a su ArrayList debido a que los simbolos son individuales y estos automaticamente
+            //se guardan cuando son detectados.
             tmp = "";
-            tipoTockens.add(TiposDeTokens.SIMBOLO);
             estadoGuardado = Estados.ESPACIO;
         } else {
             tmp += String.valueOf(c);
@@ -130,7 +130,28 @@ public class Analizador {
         }
     }
 
-    private void estadoEmpezarOEspacio(char c) {
+    private void estadoEspacio(char c) {
+        if (Character.isLetter(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.CARACTER;
+        } else if (Character.isDigit(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.DIGITO;
+        } else if (Character.isSpaceChar(c)) {
+            estadoGuardado = Estados.ESPACIO;
+        } else if (isPunto(c)) {
+            tmp += String.valueOf(c);
+            estadoGuardado = Estados.PUNTO;
+        } else if (isSimbolo(c)) {
+            tmp += String.valueOf(c);
+            tockens.add(tmp);
+            tmp = "";
+            tipoTockens.add(TiposDeTokens.SIMBOLO);
+            estadoGuardado = Estados.SIMBOLO;
+        }
+    }
+
+    private void estadoEmpezar(char c) {
         if (Character.isLetter(c)) {
             tmp += String.valueOf(c);
             estadoGuardado = Estados.CARACTER;
